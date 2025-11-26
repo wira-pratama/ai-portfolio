@@ -1,6 +1,6 @@
 # AI Systems Lab — Portfolio by Adi Wira Pratama
 
-Welcome! This repository showcases my end-to-end work in AI Engineering, Agentic Systems, Applied Machine Learning, and Backend Tool-Calling Architecture.
+Welcome! This repository showcases my end-to-end work in AI Engineering, Agentic Systems, Applied Machine Learning, and Full Stack Web Development.
 
 My focus: AI that interacts with tools, manages state, solves real problems, and produces actual outputs.
 
@@ -8,9 +8,9 @@ My focus: AI that interacts with tools, manages state, solves real problems, and
 
 ## 1. ARC Agent — Autonomous Affinity Diagram Maker
 
-**Tech:** GPT tool-calling, Node/TypeScript, Paper.js, Express/Oak, server-side SVG/PNG rendering.
+**Tech:** OpenAI tool-calling, Node/TypeScript, Paper.js, server-side SVG/PNG rendering.
 
-The ARC Agent is an autonomous system that fully automates the construction of Affinity/Relation (ARC/ARD/SRD) diagrams—traditionally done manually in Industrial Engineering.
+The ARC Agent is an autonomous system that fully automates the construction of Affinity/Relation (Activity Relationship Chart) diagrams—traditionally done manually in Industrial Engineering.
 
 The agent can:
 - parse natural-language input describing components or locations  
@@ -42,8 +42,8 @@ This showcases complex tool orchestration, stateful agent loops, and automated e
 **Adi Wira Pratama**  
 AI Systems Engineer — Indonesia  
 
-GitHub: *your-link*  
-LinkedIn: *your-link*  
-Email: *your email*  
+[*Github:* ](https://github.com/wira-pratama)
+[*Linkedin:* ](https://linkedin.com/adi-wira-pratama)
+Email: *adiwira85pratama@gmail.com*  
 
 Feel free to reach out for collaboration, research discussions, or applied AI engineering work.
