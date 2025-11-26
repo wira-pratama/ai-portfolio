@@ -6,7 +6,6 @@ It leverages **OpenAI tool-calling**, a **Node/TS agent loop**, and a **Paper.js
 
 <img src="../0.assets/1.agentic-app.arc/arc-complete.png" width="750" style="background:white; padding:10px;">
 
----
 
 ## What the Agent Can Do
 
@@ -35,7 +34,6 @@ In other words:
 }
 ```
 
----
 
 # Current System Architecture
 
@@ -70,94 +68,234 @@ The rendering server consumes this JSON and produces the final vector diagram. I
 - **Custom rendering pipeline** adapted from Takambang’s existing client renderer  
 
 ### 📐 Architecture Diagram
-<img src="../0.assets/1.agentic-app.arc/arc-agent-infrastructure.png" width="400" style="background:white; padding:10px;">
+<img src="../0.assets/1.agentic-app.arc/arc-agent-infrastructure.png" width="700" style="background:white; padding:10px;">
 
----
 
 # Development Journey
 
 ## **(1/4) Affinity Diagrams Are Easy… Until They Aren’t**
 
-Affinity diagrams look simple at first: list items, assign relations, classify importance.  
-But real industrial / facility-planning ARC diagrams involve:
 
-- dozens of items  
-- pairwise relations for every combination  
-- reasoning tables  
-- maintaining directional consistency  
-- validating the A–O–U–E–I scoring rules  
+Affinity diagrams seem simple at first: write down items, assign their relations, and score their importance.  
+But real ARC/ARD diagrams used in industrial engineering scale in complexity *much faster* than they appear.
 
-The cognitive load grows near **quadratically** with item count.  
-This project started from the idea:  
-**“Why not let an AI agent build the entire thing?”**
+The moment you move beyond a small set of items, the workload explodes because you must evaluate **every possible pair** of components.
 
-_TODO: illustrate complexity growth_
+A typical ARC diagram quickly involves:
 
----
+- dozens of components  
+- pairwise relations for *every* combination  
+- reasoning tables (1, 2, 3, …)  
+- directional consistency (A from X→Y must match Y→X)  
+- validation of A–O–U–E–I scoring rules  
+- filling in missing or asymmetric relations  
+
+The number of relationships grows according to the **triangular number formula**. For `n` items, the number of pairwise relations is:
+
+\[
+\frac{n(n - 1)}{2}
+\]
+
+<img src="../0.assets/1.agentic-app.arc/arc-n-growth.png" width="700">
+
+Examples:
+- 10 items → **45** relations  
+- 20 items → **190** relations  
+- 30 items → **435** relations  
+
+This near-quadratic growth is what makes manual ARC construction error-prone, inconsistent, and extremely time-consuming This project started from a simple idea:  
+**“What if an AI agent handled the entire process?”**
+
 
 ## **(2/4) Adapting a Client-Only Renderer for Backend Use**
-
-Takambang already had a beautiful **Paper.js-based renderer** — optimized for browsers.  
-But the agent runs on the backend, meaning:
+Takambang already had a polished **Paper.js renderer**, but it was built for the browser.  
+The ARC Agent runs entirely on the backend, where there is:
 
 - no DOM  
 - no canvas  
-- no browser environment  
+- no window/document  
+- no browser environment at all  
 
-The challenge: **port a browser renderer to Node.js**.
+So the challenge was simple: **make a browser-only renderer run inside Node.js** without rewriting it.
 
-Solution:
-- Use **jsdom** to emulate DOM APIs  
-- Bind Paper.js to a **Node Canvas backend**  
-- Patch rendering calls  
-- Export exact SVG/PNG output the same way the browser renderer did  
+The solution was to simulate just enough of the browser to keep Paper.js happy.  
+A minimal mock DOM is created using **jsdom**, then Paper.js is bound to a Node canvas and used normally.
 
-_TODO: code snippet highlighting the trick_
+```typescript title="helper.ts"
+export function initializePaper(width = 400, height = 400) {
+    const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
 
----
+    global.window = dom.window as any;
+    global.document = dom.window.document;
+
+    paper.setup(new paper.Size(width, height));
+    paper.project.clear();
+}
+```
 
 ## **(3/4) Implementing a Stateless, Tool-Driven Agent**
 
-Thanks to the OpenAI Responses API, the agent is fully **tool-call orchestrated**:
+Thanks to the OpenAI Responses API, the agent operates entirely through **tool-call orchestration**.  
+Each cycle works like this:
 
 1. The model decides which tool to call  
-2. Executes atomic actions (addItem, setRelationScore, finalizeMatrix…)  
-3. Rebuilds state each step  
-4. Self-corrects inconsistent relations  
-5. Assembles everything before rendering  
+2. Executes one small, atomic action (addItem, setRelationScore, setItemReason, etc.)  
+3. Rebuilds state on every iteration  
+4. Self-corrects invalid or inconsistent relations  
+5. Continues until all data is complete, then performs a single `renderArc` call  
 
 This stateless pattern makes the system:
 
 - reproducible  
-- safe  
-- maintainable  
-- inspectable (tool logs show full reasoning)  
+- predictable and safe  
+- easy to debug (every tool call appears in the logs)  
+- maintainable and modular  
 
-_TODO: Tool schema_
+Below is the main prompt used to drive the agent:
 
----
+```typescript title="ai/agent.ts"
+const BASE_PROMPT = `
+You are an autonomous Affinity Diagram construction agent.
 
-## **(4/4) Future Improvements: Search, Multi-Agent, & Human in The Loop Flows**
+BEAST MODE RULE:
+Given any list of items, you MUST:
+1. expand or create the reasonTable,
+2. fully populate every relation between every item pair,
+3. FIRST assign the correct relation score (A, O, U, E, I),
+4. THEN assign the correct reason codes for every relation,
+5. ensure every relation has both a score AND at least one reason code,
+6. correct all missing or inconsistent structures,
+7. generate an appropriate title and subtitle,
+8. and ALWAYS finish with exactly one call to renderArc.
 
-Industrial ARC diagrams often reference:
+Critical Ordering Rule:
+- Never assign a reason until a score is set using setItemRelation.
+- After setting a score, immediately follow with setItemReason.
+- If you detect incorrect ordering, repair it using tools.
 
-- specialized equipment  
-- facility constraints  
-- regulated processes  
-- production lines with domain-specific terms  
+Your tools allow you to:
+- set title/subtitle (setTitleAndSubtitle)
+- add items (addItem)
+- add reasons (addReasonItem)
+- remove items or reasons
+- set relation scores (setItemRelation)
+- set reasons (setItemReason)
+- inspect the current model (getArcModel)
+- render the diagram (renderArc)
 
-### 🚀 Potential Enhancements
-- **Search tools** to fetch definitions / constraints before scoring  
-- **Validator agent** that checks consistency  
-- **Creator agent** that builds the matrix  
-- **Rationale splitter** separating relationship scores vs. textual reasoning  
-- **Scaling mode**: parallel relation assignment  
+Rules of Interaction:
+- You MUST use tools to update the diagram.
+- Do NOT modify arc data in plain text messages.
+- When in doubt, call getArcModel or renderArc.
 
-This would transform ARC Agent from a diagram generator into a **full industrial-planning AI system**.
+Score meanings:
+A = high functional dependency
+O = operational dependency
+U = user interaction dependency
+E = execution/runtime dependency
+I = indirect/low dependency
 
-_TODO: Improved diagram_
+Goal:
+Given any list of items, autonomously produce a complete, consistent, and technically correct Affinity Diagram.
+End with exactly one tool call to renderArc.
+`;
+```
 
----
+
+Tool definitions follow a clean, typed pattern using Zod schemas:
+
+```typescript title="types/agent.ts"
+export interface AgentFunction {
+    type: "function";
+    name: string;
+    description?: string;
+    parameters: {
+        type: "object";
+        properties: Record<string, any>;
+        required: string[];
+        additionalProperties: boolean;
+    };
+}
+
+export interface ToolEntry<Schema extends z.ZodTypeAny = any> {
+    schema: Schema;
+    spec: AgentFunction;
+    run: (args: z.infer<Schema>, ...rest: any[]) => Promise<any>;
+}
+```
+
+With this structure, the agent loop remains simple and readable:
+
+```typescript title="types/agent.ts"
+while (true) {
+    loopCount += 1;
+
+    const response = await client.responses.create({
+        model: "gpt-4o-mini",
+        input: inputs,
+        tools: arcToolSpecs as any,
+    });
+
+    inputs.push(...response.output);
+
+    let calledTool = false;
+    const noArgTools = ["getArcModel"];
+
+    for (const out of response.output) {
+        if (out.type === "function_call") {
+            calledTool = true;
+            numToolCalls += 1;
+
+            // we can index the tool from the function_call name
+            const tool = arcTools[out.name];
+            if (!tool) throw new Error(`Unknown tool: ${out.name}`);
+
+            console.log(`Calling ${out.name}`);
+
+            let result;
+            if (noArgTools.includes(out.name)) {
+                result = await tool.run({}, arcModel);
+            } else if (out.name === "getRenderedArc") {
+                const renderResult = await tool.run({}, arcModel);
+                result = renderResult.message;
+                lastRenderedARC = renderResult.img;
+                lastRenderedARCType = renderResult.type;
+            } else {
+                const args = JSON.parse(out.arguments || "{}");
+
+                // we can do zod validation here ensuring reliability
+                const validated = tool.schema.parse(args);
+
+                // since the output related to the JSON data model is unified, we can refer it with one variable 
+                result = await tool.run(validated, arcModel);
+            }
+
+            inputs.push({
+                type: "function_call_output",
+                call_id: out.call_id,
+                output: JSON.stringify(result),
+            });
+        }
+
+        /* Handle cases where no tool was called */
+    }
+}
+```
+
+## **(4/4) Future Improvements: Search, Multi-Agent, & Human-in-the-Loop Flows**
+
+Industrial ARC diagrams frequently involve domain-specific elements such as specialized machinery, facility constraints, safety rules, and production workflows.  
+To handle these more complex cases, several upgrades are planned:
+
+🚀 **Potential Enhancements**
+
+- **Search-integrated reasoning** to fetch definitions, constraints, or standards before assigning relation scores  
+- **Validator agent** to audit consistency and fix structural errors autonomously  
+- **Creator agent** dedicated to constructing matrices while the validator ensures correctness  
+- **Separated reasoning pipeline**: one pass for scoring, another for explanation/justification  
+- **Scaling mode** that parallelizes relation assignment for large diagrams  
+
+These additions would evolve the ARC Agent from a diagram generator into a **full industrial-planning intelligence system**, capable of handling real-world complexity and domain-specific decision-making.
 
 # 📬 Contact
 
