@@ -1,5 +1,7 @@
 # ARC Agent — Autonomous Affinity Diagram Generator
 
+[Demo on Instagram](https://www.instagram.com/reel/DRd9LdQD2Mo/)
+
 ARC Agent is an end-to-end **agentic automation system** that generates fully structured Activity Relationship Charts (ARC/ARD/SRD) directly from **natural-language descriptions**. 
 
 It leverages **OpenAI tool-calling**, a **Node/TS agent loop**, and a **Paper.js rendering server** to produce clean SVG/PNG diagrams without any human involvement.
