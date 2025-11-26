@@ -10,30 +10,9 @@ My focus: AI that interacts with tools, manages state, solves real problems, and
 
 **Tech:** OpenAI tool-calling, Node/TypeScript, Paper.js, server-side SVG/PNG rendering.
 
-The ARC Agent is an autonomous system that fully automates the construction of Affinity/Relation (Activity Relationship Chart) diagrams—traditionally done manually in Industrial Engineering.
+ARC Agent is an end-to-end autonomous system that generates complete Affinity/Relation (Activity Relationship Chart) diagrams directly from natural-language descriptions. It parses item lists, generates reasons, assigns A–O–U–E–I scores, auto-completes the full pairwise matrix, resolves missing or inconsistent structure, and renders polished SVG/PNG diagrams via a Paper.js backend.
 
-The agent can:
-- parse natural-language input describing components or locations  
-- add all items automatically  
-- generate relation reasons  
-- assign A–O–U–E–I relationship scores  
-- fill the entire pairwise relation matrix  
-- detect and fix missing structure or asymmetries  
-- finalize everything and send it to a dedicated Paper.js render server  
-- output clean SVG/PNG diagrams programmatically  
-
-This showcases complex tool orchestration, stateful agent loops, and automated engineering visualization.
-
----
-
-## 🧰 Technical Areas Covered
-
-### Agentic AI Systems
-- multi-step autonomy  
-- tool-calling orchestration  
-- JSON/state management  
-- self-correction and validation loops  
-- deterministic reasoning paths  
+This project demonstrates coordinated tool-calling, stateful multi-step agent loops, and automated engineering visualization in a production-ready workflow.
 
 ---
 
@@ -42,8 +21,8 @@ This showcases complex tool orchestration, stateful agent loops, and automated e
 **Adi Wira Pratama**  
 AI Systems Engineer — Indonesia  
 
-[*Github:* ](https://github.com/wira-pratama)
-[*Linkedin:* ](https://linkedin.com/adi-wira-pratama)
-Email: *adiwira85pratama@gmail.com*  
+**GitHub:** https://github.com/wira-pratama  
+**LinkedIn:** https://linkedin.com/in/adi-wira-pratama  
+**Email:** adiwira85pratama@gmail.com  
 
 Feel free to reach out for collaboration, research discussions, or applied AI engineering work.
