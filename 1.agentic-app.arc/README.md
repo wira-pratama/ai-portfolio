@@ -4,26 +4,62 @@ ARC Agent is an end-to-end **agentic automation system** that generates fully st
 
 It leverages **OpenAI tool-calling**, a **Node/TS agent loop**, and a **Paper.js rendering server** to produce clean SVG/PNG diagrams without any human involvement.
 
-<img src="../0.assets/1.agentic-app.arc/arc-complete.png" height="500" style="background:white; padding:10px;">
+<img src="../0.assets/1.agentic-app.arc/arc-complete.png" width="750" style="background:white; padding:10px;">
 
 ---
 
 ## What the Agent Can Do
 
-- Convert natural-language lists → complete ARC diagram  
-- Automatically add items and normalize labels  
-- Generate structured reason tables (1, 2, 3, …)  
-- Assign A–O–U–E–I relationship scores  
-- Auto-complete the entire pairwise relationship matrix  
-- Detect and correct missing or asymmetric relations  
-- Render diagrams via Paper.js → SVG/PNG output  
-- Run fully autonomously using OpenAI’s Responses API  
+ARC Agent takes a simple, natural-language list of components and automatically produces a **complete, structurally consistent Activity Relationship Chart**.  
+From a user’s perspective, you only describe the items — the agent handles everything else.
+
+Here’s what it does behind the scenes:
+
+- Interprets natural-language input and extracts all item names  
+- Cleans and normalizes labels so they’re consistent in the diagram  
+- Generates clear, numbered “reason tables” (1, 2, 3, …) to justify relationships  
+- Assigns A–O–U–E–I scores to every pair of items  
+- Fills in the entire pairwise matrix without leaving gaps  
+- Detects asymmetries or missing relations and fixes them automatically  
+- Sends the finalized matrix to a Paper.js renderer to output an SVG/PNG diagram  
+- Operates fully autonomously through OpenAI's Responses + tool-calling workflow  
+
+In other words:  
+**You give the items. The agent produces the entire ARC diagram.**
+
+### Example Input Prompt
+
+```json
+{
+  "prompt": "Here is the list of components. Build the entire Affinity Diagram automatically in full. Use your tools to add items, generate reasons, set all relations, assign reasons to each relation AFTER assigning relation scores, complete the entire matrix, fix missing structure, and end by calling renderArc.\n\nItems:\nAssembly Line\nQuality Inspection Area\nWarehouse Storage\nPackaging Station\nMaintenance Workshop"
+}
+```
 
 ---
 
 # Current System Architecture
 
-> Designed as a backend-only service, integrated into the **Takambang.com** infrastructure.
+At a high level, the agent’s job is to take natural-language input, transform it into a structured internal model, and then pass that model to a rendering backend that generates the final ARC diagram. The core output of the agent is a JSON object shaped like this:
+
+```json
+{
+  "diagramTitle": "string",
+  "diagramSubTitle": "string",
+  "returnSVG": true,
+  "scoreTable": "en",
+  "reasonTable": { /* generated numbered reasons */ },
+  "relations": { /* full pairwise A–O–U–E–I matrix */ }
+}
+```
+
+This JSON fully represents the finalized diagram, including:
+- metadata (title / subtitle)
+- language-specific score table
+- auto-generated reason table
+- a complete, validated relationship matrix
+- rendering mode (SVG or PNG)
+
+The rendering server consumes this JSON and produces the final vector diagram. In this project the rendering server is implemented in the `/arc` endpoint.
 
 ### 🔧 Technologies Used
 - **Node.js**, **TypeScript**, **Express**  

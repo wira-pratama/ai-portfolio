@@ -66,6 +66,8 @@ app.post("/arc", async (req, res) => {
         /*
             JSON Payload should be:
             {
+                diagramTitle: string,
+                diagramSubTitle: string,
                 returnSVG: bool,
                 scoreTable: "en" | "id"
                 reasonTable: Table
