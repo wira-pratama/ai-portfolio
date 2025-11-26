@@ -90,11 +90,7 @@ A typical ARC diagram quickly involves:
 - validation of A–O–U–E–I scoring rules  
 - filling in missing or asymmetric relations  
 
-The number of relationships grows according to the **triangular number formula**. For `n` items, the number of pairwise relations is:
-
-\[
-\frac{n(n - 1)}{2}
-\]
+The number of relationships grows according to the **triangular number formula**. For `n` items, the number of pairwise relations is: (n(n - 1))/2
 
 <img src="../0.assets/1.agentic-app.arc/arc-n-growth.png" width="700">
 
@@ -303,6 +299,7 @@ These additions would evolve the ARC Agent from a diagram generator into a **ful
 AI Systems Engineer — Indonesia  
 
 - **GitHub:** https://github.com/wira-pratama  
+- **HuggingFace:** https://huggingface.co/wira-pratama  
 - **LinkedIn:** https://linkedin.com/in/adi-wira-pratama  
 - **Email:** adiwira85pratama@gmail.com  
 
