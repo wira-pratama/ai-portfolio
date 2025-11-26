@@ -70,7 +70,7 @@ The rendering server consumes this JSON and produces the final vector diagram. I
 - **Custom rendering pipeline** adapted from Takambang’s existing client renderer  
 
 ### 📐 Architecture Diagram
-_TODO: architecture diagram_
+<img src="../0.assets/1.agentic-app.arc/arc-agent-infrastructure.png" width="400" style="background:white; padding:10px;">
 
 ---
 
