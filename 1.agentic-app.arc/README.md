@@ -4,6 +4,8 @@ ARC Agent is an end-to-end **agentic automation system** that generates fully st
 
 It leverages **OpenAI tool-calling**, a **Node/TS agent loop**, and a **Paper.js rendering server** to produce clean SVG/PNG diagrams without any human involvement.
 
+<img src="../0.assets/1.agentic-app.arc/arc-complete.png" height="500" style="background:white; padding:10px;">
+
 ---
 
 ## What the Agent Can Do

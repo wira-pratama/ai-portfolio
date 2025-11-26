@@ -20,6 +20,6 @@
         "moduleDetection": "force",
         "skipLibCheck": true,
 
-        "types": ["node"] // <-- FIXED
+        "types": ["node"]
     }
 }
